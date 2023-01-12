@@ -1,0 +1,232 @@
+package edu.westga.dsdm.model;
+
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+/**
+ * The Class SinglyLinkedList
+ * 
+ * @author CS3151
+ * @version Spring 2023
+ * @param <E> type of list elements
+ */
+public class SinglyLinkedList<E> implements Iterable<E> {
+	private Node head;
+	
+	// returns the size minus the sentinel containers (-2)
+	private int size;
+
+	/**
+	 * Creates a new singly-linked list
+	 * 
+	 * @pre none
+	 * @post size() == 0
+	 */
+	public SinglyLinkedList() {
+		this.head = null;
+		this.size = 0;
+	}
+
+	
+	/**
+	 * Gets the element at the head of this list
+	 * 
+	 * @pre none
+	 * @post none
+	 * @return the element at the head of this list
+	 * @throws NoSuchElementException if this list is empty
+	 */
+	public E getHead() {
+		if (this.size <= 0) {
+			throw new NoSuchElementException();
+		}
+		return this.head.value;
+	}
+	
+	/**
+	 * Gets the element at the tail of this list
+	 * 
+	 * @pre none
+	 * @post none
+	 * @return the element at the tail of this list
+	 * @throws NoSuchElementException if this list is empty
+	 */
+	public E getTail() {
+		if (this.size <= 0) {
+			throw new NoSuchElementException();
+		}
+		// need to iterate through all containers to reach last one, until
+		// find one w/ value == null
+		Node node = this.head;
+		
+		// if the value is not null, move to the next one
+		while (node.next != null) {
+			node = node.next;
+		}
+		return node.value;
+	}
+
+	/**
+	 * Gets the size.
+	 * 
+	 * @pre none
+	 * @post none
+	 * @return the number if elements in this list
+	 */
+	public int size() {
+		return this.size;
+	}
+
+	/**
+	 * Check if this list is empty.
+	 * 
+	 * @pre none
+	 * @post none
+	 * @return true if this list is empty
+	 */
+	public boolean isEmpty() {
+		return this.size == 0;
+	}
+	
+	/**
+	 * Adds the specified element at the head of this list
+	 * 
+	 * @pre none
+	 * @post size() == size()@pre + 1 && getHead().equals(element)
+	 * @param element the element to be added
+	 */
+	public void addHead(E element) {
+		Node newNode = new Node(element);
+		this.size++;
+		newNode.next = this.head;
+		this.head = newNode;
+	}
+
+	/**
+	 * Adds the specified element at the tail of this list
+	 * 
+	 * @pre none
+	 * @post size() == size()@pre + 1 && getTail().equals(element)
+	 * @param element the element to be added
+	 */
+	public void addTail(E element) {
+		Node newNode = new Node(element);
+		this.size++;
+		if (this.head == null) {
+			this.head = newNode;
+		}
+		Node node = this.head;
+		// check to see if the node after the head is null (s. tail)
+		while (node.next != null) {
+			// if the s. tail is NOT after the head (not null), then move
+			// to the next node (now the next node is labeled as "head")
+			node = node.next;
+		}
+		// else (if the next node = null (is s. tail)
+		node.next = newNode;
+	}
+
+	/**
+	 * Removes the element at the head of this list
+	 *
+	 * @pre size() > 0
+	 * @post size() == size()@pre - 1
+	 * @return the removed element
+	 * @throws NoSuchElementException if this list is empty
+	 */
+	public E removeHead() {
+		if (this.size <= 0) {
+			throw new NoSuchElementException();
+		}
+		if (this.size == 1) {
+			return this.removeTail();
+		}
+		this.size--;
+		Node newHead = this.head.next;
+		this.head = newHead;
+		return newHead.value;
+	}
+	
+	/**
+	 * removes the element at the tail of this list
+	 * 
+	 * @pre size() > 0
+	 * @post size() == size()@pre - 1
+	 * @return the removed element
+	 * @throws NoSuchElementException if this list is empty
+	 */
+	public E removeTail() {
+		if (this.size <= 0) {
+			throw new NoSuchElementException();
+		}
+		
+		if (this.size == 1) {
+			return this.removeHead();
+		}
+		
+		this.size--;
+		Node node = this.head;
+		while (node.next.next != null) {
+			node = node.next;
+		}
+		E value = node.next.value;
+		node.next = null;
+		return value;
+	}
+	
+	@Override
+	public Iterator<E> iterator() {
+		return new ForwardIterator();
+	}
+
+	// creates a Node container object itself, only accessible within this class (only in the instance of editing a linked list)
+	private final class Node {
+		private E value;
+		private Node next;
+
+		private Node(E item) {
+			this.value = item;
+			this.next = null;
+		}
+	}
+
+	/**
+	 * Class ForwardIterator
+	 * 
+	 * declare an inner class for iteration/traversing over the linked list
+	 * 
+	 * this class is needed for the user to not need to keep calling next, since if there isn't a next item,
+	 * a nullPOinterException would be thrown
+	 * @author CS3151
+	 */
+	public class ForwardIterator implements Iterator<E> {
+		private Node nextNode;
+
+		/**
+		 * Instantiates a new forward iterator
+		 */
+		public ForwardIterator() {
+			this.nextNode = SinglyLinkedList.this.head;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return this.nextNode != null;
+		}
+
+		@Override
+		public E next() {
+			if (!this.hasNext()) {
+				throw new NoSuchElementException();
+			}
+			E element = this.nextNode.value;
+			this.nextNode = this.nextNode.next;
+			return element;
+		}
+	}
+	
+	// how would you implement a backwardsIterator? 
+	// could declare nextNode as the tail
+	// hasNext would be the same as forwardIterator
+	// next(): 
+}
